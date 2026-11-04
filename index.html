@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cape Town Fortnightly</title>
 <meta name="description" content="What&#x27;s on in Cape Town and the Winelands.">
+<link rel="canonical" href="https://fortnightly.capetown/">
+<meta name="theme-color" content="#eef2f1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23a82b57%22/%3E%3Cpath%20d%3D%22M20%2014h26v9H30v8h14v9H30v12H20z%22%20fill%3D%22%23fff%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="https://fortnightly.capetown/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Cape Town Fortnightly">
+<meta property="og:title" content="Cape Town Fortnightly">
+<meta property="og:description" content="What&#x27;s on in Cape Town and the Winelands.">
+<meta property="og:url" content="https://fortnightly.capetown/">
+<meta property="og:image" content="https://fortnightly.capetown/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
@@ -47,6 +61,8 @@ svg.i { width:1em; height:1em; flex:none; vertical-align:-.125em; }
 .masthead h1 { font-stretch:68%; font-weight:800; font-size:clamp(32px, 5vw, 52px); line-height:.95; letter-spacing:-.005em; margin:0 0 8px; }
 .masthead p { margin:0; max-width:72ch; }
 .masthead .updated { color:var(--muted); white-space:nowrap; }
+.masthead .stale { color:var(--protea); font-weight:600; margin:4px 0 0; }
+.foot a { color:inherit; }
 
 /* the day rail: today and the weekend stay put, the other days scroll */
 .rail { position:sticky; top:0; z-index:1001; background:var(--paper); border-bottom:1px solid var(--rule); }
@@ -367,6 +383,9 @@ body.curate .dayhead { top:calc(var(--rail-h) + var(--map-h) + 38px); }
     <footer class="foot">
       <p>Not listed: online-only events, conferences and trade shows, religious services.</p>
       <p>Each event links to the organiser or ticket seller. Times and prices change, so check there before you go.</p>
+      <p>Made in Cape Town by Timothy de Wet. The listings are gathered every week by software from venues' and organisers' own
+      announcements, their newsletters and Instagram, and the ticket sites, then read and sorted by a language model, so
+      mistakes happen. <a href="mailto:capetowneventstdw@gmail.com?subject=Cape%20Town%20Fortnightly%3A%20a%20mistake">Report a mistake</a>.</p>
       <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</p>
     </footer>
   </main>
@@ -444,6 +463,16 @@ const WEEKEND = (() => {
   return DAYS.filter(d => d >= a && d <= b);
 })();
 $("updated").textContent = "Updated " + dShort(D.generated) + ".";
+const AGE = Math.round((new Date() - new Date(D.generated + "T00:00:00")) / 864e5);
+if (AGE > 10) { const n = document.createElement("p"); n.className = "stale";
+  n.textContent = `This page was last rebuilt ${AGE} days ago, so some of it will be out of date.`; document.querySelector(".masthead").appendChild(n); }
+// visits are counted without cookies (GoatCounter, when the page carries it); so are clicks out to events and on the filter groups
+document.addEventListener("click", e => {
+  if (!window.goatcounter) return;
+  const a = e.target.closest("a.go"), c = e.target.closest("#groups .chip");
+  if (a) window.goatcounter.count({path: "out: " + (a.getAttribute("aria-label") || a.href).slice(0, 120), title: a.href, event: true});
+  else if (c) window.goatcounter.count({path: "filter: " + c.textContent.replace(/\d+\s*$/, "").trim(), event: true});
+});
 
 // prepare items: every day each one is on, its groups, a venue key, and a haystack for search
 D.items.forEach((it, k) => {
